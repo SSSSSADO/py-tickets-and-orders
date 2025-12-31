@@ -1,18 +1,15 @@
-import datetime
-
+from django.contrib.auth import get_user_model
 from django.db import transaction
-from django.db.models import QuerySet
 from django.utils.dateparse import parse_datetime
-from db.models import Order, Ticket, User
+from db.models import Order, Ticket
 
+
+User = get_user_model()
 
 @transaction.atomic
-def create_order(
-        tickets: list[dict],
-        username: str,
-        date: datetime.date = None,
-) -> Order:
+def create_order(tickets, username, date=None):
     user = User.objects.get(username=username)
+
     order = Order.objects.create(user=user)
 
     if date:
@@ -26,10 +23,11 @@ def create_order(
             row=ticket["row"],
             seat=ticket["seat"]
         )
+
     return order
 
-def get_orders(username: str = None) -> QuerySet:
-    queryset = Order.objects.all()
+def get_orders(username=None):
+    qs = Order.objects.all()
     if username:
-        queryset = queryset.filter(user__username=username)
-    return queryset
+        qs = qs.filter(user__username=username)
+    return qs
